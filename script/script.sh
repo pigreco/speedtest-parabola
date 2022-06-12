@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# crea variabili
+data=`date +"%Y-%m-%dT%H:%M:%S%:z"`
+valori=`speedtest -f csv`
+# concatena
+record=$data,$valori
+# salva i record
+echo $record >>/mnt/d/GitHub/speedtest-parabola/output/toto-migliorato.csv 2>&1
