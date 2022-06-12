@@ -1,5 +1,5 @@
 #!/bin/bash
 
-git add -A -- D:\GitHub\speedtest-parabola\output\toto-migliorato.csv
+git add .
 git commit -m "update"
 git push
