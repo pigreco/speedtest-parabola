@@ -13,3 +13,9 @@ espressione per importare il file csv
 
 1. Avvia script.sh per lo speedtest;
 2. Avvia script-push.sh per il commit nel repository
+
+## Grafico
+
+![](imgs/osd2p-speed-test-download-upload-mbps-.png)
+
+<https://www.datawrapper.de/_/osd2p/>
