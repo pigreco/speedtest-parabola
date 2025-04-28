@@ -45,5 +45,3 @@ L'output del comando `speedtest -f csv` non include le intestazioni dei campi ne
 19. `upload_latency_high` - "57.564" (in ms)
 20. `idle_latency` - "28.896" (in ms)
 21. `idle_latency_high` - "30.23" (in ms)
-
-Se vuoi includere queste intestazioni nel tuo file CSV, potresti modificare lo script per aggiungere una riga di intestazione se il file non esiste ancora.
