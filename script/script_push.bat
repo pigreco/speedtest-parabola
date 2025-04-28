@@ -1,4 +1,4 @@
 @echo off
-git add -A -- "D:\GitHub\speedtest-parabola\output\toto-migliorato.csv"
+git add -A -- "D:\GitHub\speedtest-parabola\output\buonarroti.csv"
 git commit -m "update"
 git push
