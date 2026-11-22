@@ -56,6 +56,8 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; marg
 .dates { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted); }
 .dates input { font: inherit; font-size: .82rem; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--fg); }
 .dates input.custom { border-color: var(--accent); }
+.units { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+@media (max-width: 719px) { .units { margin-left: 0; } }
 .period-summary { font-size: .82rem; color: var(--muted); flex-basis: 100%; }
 .period-summary b { color: var(--fg); font-weight: 500; }
 
@@ -133,14 +135,19 @@ footer a { color: var(--accent); }
       <label for="date-from">Dal</label><input type="date" id="date-from">
       <label for="date-to">al</label><input type="date" id="date-to">
     </div>
+    <div class="units" role="group" aria-label="Unità di velocità">
+      <span class="period-label">Unità</span>
+      <button type="button" class="chip" data-unit="Mbps" aria-pressed="true">Mbps</button>
+      <button type="button" class="chip" data-unit="MBs" aria-pressed="false">MB/s</button>
+    </div>
     <p class="period-summary" id="period-summary">&nbsp;</p>
   </section>
 
   <section class="tiles" aria-label="Riepilogo del periodo">
-    <div class="tile" data-rate="download"><div class="tile-head"><span class="label">Download mediano</span><span class="badge"></span></div><span class="big"><span data-k="download">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
-    <div class="tile" data-rate="upload"><div class="tile-head"><span class="label">Upload mediano</span><span class="badge"></span></div><span class="big"><span data-k="upload">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
+    <div class="tile" data-rate="download"><div class="tile-head"><span class="label">Download mediano</span><span class="badge"></span></div><span class="big"><span data-k="download">—</span><span class="unit" data-speed-unit>Mbps</span></span><span class="note" data-period-note>—</span></div>
+    <div class="tile" data-rate="upload"><div class="tile-head"><span class="label">Upload mediano</span><span class="badge"></span></div><span class="big"><span data-k="upload">—</span><span class="unit" data-speed-unit>Mbps</span></span><span class="note" data-period-note>—</span></div>
     <div class="tile" data-rate="ping_roma"><div class="tile-head"><span class="label">Ping mediano</span><span class="badge"></span></div><span class="big"><span data-k="ping_roma">—</span><span class="unit">ms</span></span><span class="note">Server WindTre Roma</span></div>
-    <div class="tile" data-rate="quota_lenti"><div class="tile-head"><span class="label">Test sotto 500 Mbps</span><span class="badge"></span></div><span class="big"><span data-k="quota_lenti">—</span><span class="unit">%</span></span><span class="note">Quota dei test riusciti</span></div>
+    <div class="tile" data-rate="quota_lenti"><div class="tile-head"><span class="label">Test sotto <span data-speed-value="500">500 Mbps</span></span><span class="badge"></span></div><span class="big"><span data-k="quota_lenti">—</span><span class="unit">%</span></span><span class="note">Quota dei test riusciti</span></div>
     <div class="tile" data-rate="perdite_pct"><div class="tile-head"><span class="label">Test con perdita oltre 5%</span><span class="badge"></span></div><span class="big"><span data-k="perdite">—</span></span><span class="note"><span data-k="perdite_pct">—</span>% dei test, di cui <span data-k="perdite_warian">—</span> sul server Warian – Napoli</span></div>
     <div class="tile" data-rate="riusciti_pct"><div class="tile-head"><span class="label">Test eseguiti</span><span class="badge"></span></div><span class="big"><span data-k="test">—</span></span><span class="note"><span data-k="riusciti_pct">—</span>% riusciti, <span data-k="falliti">—</span> non riusciti</span></div>
   </section>
@@ -183,8 +190,8 @@ footer a { color: var(--accent); }
     <div class="tablewrap">
       <table>
         <thead><tr>
-          <th>Mese</th><th>Test</th><th>Non riusciti</th><th>Download mediano (Mbps)</th><th>Download, 5% peggiore (Mbps)</th>
-          <th>Upload mediano (Mbps)</th><th>Ping mediano (ms)</th><th>Ping minimo (ms)</th><th>Perdita oltre 5%</th>
+          <th>Mese</th><th>Test</th><th>Non riusciti</th><th>Download mediano (<span data-speed-unit>Mbps</span>)</th><th>Download, 5% peggiore (<span data-speed-unit>Mbps</span>)</th>
+          <th>Upload mediano (<span data-speed-unit>Mbps</span>)</th><th>Ping mediano (ms)</th><th>Ping minimo (ms)</th><th>Perdita oltre 5%</th>
         </tr></thead>
         <tbody id="mesi-body"></tbody>
       </table>
@@ -198,6 +205,7 @@ footer a { color: var(--accent); }
       <dt id="soglie">Valutazione dei riquadri</dt><dd>Ogni riquadro è confrontato con quello che ci si aspetta da una fibra FTTH da 1 Gbps in download e 300 Mbps in upload. Il download reale non supera circa 940 Mbps, il limite pratico di una porta di rete Gigabit.
         <div class="tablewrap"><table class="thresholds"><thead><tr><th>Riquadro</th><th>Eccellente</th><th>Buono</th><th>Medio / scarso</th></tr></thead><tbody id="soglie-body"></tbody></table></div></dd>
       <dt>Periodo</dt><dd>I periodi rapidi contano i giorni a ritroso dall'ultimo test registrato. Con le date Dal e al puoi scegliere un intervallo qualsiasi: riquadri, grafici e tabella si aggiornano insieme. Il periodo scelto resta nell'indirizzo della pagina, così puoi condividerlo.</dd>
+      <dt>Mbps e MB/s</dt><dd>Gli speedtest misurano in megabit al secondo (Mbps); i programmi di download e Windows mostrano i megabyte al secondo (MB/s). Un byte vale 8 bit, quindi 1 MB/s = 8 Mbps: 931 Mbps sono circa 116 MB/s. Il pulsante Unità cambia tutte le velocità della pagina; le soglie restano le stesse.</dd>
       <dt>Mediana</dt><dd>Il valore centrale: metà dei test sta sopra, metà sotto. Non risente dei singoli test andati male.</dd>
       <dt>Andamento</dt><dd>Per periodi fino a 31 giorni il grafico mostra ogni singolo test; per periodi più lunghi la mediana di ogni giorno.</dd>
       <dt>Download, 5% peggiore</dt><dd>Il valore sotto cui cade il 5% dei test del mese: mostra quanto va male la linea nei momenti peggiori.</dd>
@@ -229,6 +237,12 @@ footer a { color: var(--accent); }
     perdite_pct:  { dir: 'low',  ex: 1,   good: 3,   unit: '%',    name: 'Test con perdita oltre 5%' },
     riusciti_pct: { dir: 'high', ex: 98,  good: 95,  unit: '%',    name: 'Test riusciti' }
   };
+  // Unità di velocità: i dati restano in Mbps, la pagina li mostra in Mbps o MB/s (1 MB/s = 8 Mbps)
+  let speedUnit = 'Mbps';
+  try { if (localStorage.getItem('speedUnit') === 'MBs') speedUnit = 'MBs'; } catch (e) { /* preferenza non disponibile */ }
+  const U = () => (speedUnit === 'MBs' ? 'MB/s' : 'Mbps');
+  const sp = (v) => (v == null ? null : speedUnit === 'MBs' ? v / 8 : v);
+  const spf = (v) => (v == null ? '—' : speedUnit === 'MBs' ? num.format(',.1f')(v / 8) : num.format(',.0f')(v));
   const RATING_LABEL = { ex: 'Eccellente', good: 'Buono', low: 'Medio / scarso' };
   function rate(key, v) {
     const c = RATING[key];
@@ -301,7 +315,7 @@ footer a { color: var(--accent); }
     render();
   }
   function syncControls() {
-    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.preset === period.preset)));
+    document.querySelectorAll('.chip[data-preset]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.preset === period.preset)));
     const f = document.getElementById('date-from'), t = document.getElementById('date-to');
     [f, t].forEach((i) => { i.min = firstDay; i.max = lastDay; i.classList.toggle('custom', period.preset === 'custom'); });
     f.value = period.from; t.value = period.to;
@@ -371,8 +385,8 @@ footer a { color: var(--accent); }
     const ping = r1(d3.median(dopo.filter((r) => r.server_id === ROMA_ID), (r) => n(r.idle_latency)));
     const lede = document.getElementById('lede');
     const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
-    lede.replaceChildren('Dal 12 febbraio 2026 la linea in fibra FTTH scarica a ', b(F.int(dDopo) + ' Mbps'),
-      ' di mediana, contro ', b(F.int(dPrima) + ' Mbps'), ' dei mesi precedenti. Il ping verso il server WindTre di Roma resta intorno a ',
+    lede.replaceChildren('Dal 12 febbraio 2026 la linea in fibra FTTH scarica a ', b(spf(dDopo) + ' ' + U()),
+      ' di mediana, contro ', b(spf(dPrima) + ' ' + U()), ' dei mesi precedenti. Il ping verso il server WindTre di Roma resta intorno a ',
       b(F.one(ping) + ' ms'), ': è il ritardo fisso del percorso fino a WindTre.');
     const last = all[all.length - 1];
     const meta = document.getElementById('meta');
@@ -387,7 +401,7 @@ footer a { color: var(--accent); }
     const one = new Set(['ping_roma', 'quota_lenti', 'perdite_pct', 'riusciti_pct']);
     document.querySelectorAll('[data-k]').forEach((el) => {
       const v = t[el.dataset.k];
-      el.textContent = v == null ? '—' : (one.has(el.dataset.k) ? F.one(v) : F.int(v));
+      el.textContent = v == null ? '—' : (el.dataset.k === 'download' || el.dataset.k === 'upload') ? spf(v) : (one.has(el.dataset.k) ? F.one(v) : F.int(v));
     });
     document.querySelectorAll('.tile[data-rate]').forEach((tile) => {
       const r = rate(tile.dataset.rate, t[tile.dataset.rate]);
@@ -429,14 +443,16 @@ footer a { color: var(--accent); }
 
   function drawTrend() {
     const el = document.getElementById('trend');
-    const info = { download: ['Download', 'Mbps', F.int], upload: ['Upload', 'Mbps', F.int], ping: ['Ping', 'ms', F.one] }[metric];
+    const info = { download: ['Download', U(), spf], upload: ['Upload', U(), spf], ping: ['Ping', 'ms', F.one] }[metric];
+    const val = (d) => (metric === 'ping' ? d.ping : sp(d[metric]));
+    const raw = (d) => d[metric];
     const rows = view.serie.filter((r) => r[metric] != null);
     if (!rows.length) return empty(el);
     el.replaceChildren();
     const W = Math.max(280, el.clientWidth), H = 260, top = 18, bottom = 26, accent = css('--accent');
     const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
       .attr('role', 'img').attr('aria-label', `${info[0]} ${view.detail ? 'di ogni test' : 'mediano di ogni giorno'} nel periodo scelto`);
-    const y = d3.scaleLinear().domain([0, d3.max(rows, (d) => d[metric]) * 1.05 || 1]).nice().range([H - bottom, top]);
+    const y = d3.scaleLinear().domain([0, d3.max(rows, (d) => val(d)) * 1.05 || 1]).nice().range([H - bottom, top]);
     const yt = y.ticks(5);
     const ml = textWidth(svg, F.int(yt[yt.length - 1])) + 10, mr = 10;
     let [x0, x1] = d3.extent(rows, (d) => d.d);
@@ -463,10 +479,10 @@ footer a { color: var(--accent); }
     // Nei singoli test la linea si interrompe quando mancano test per più di 2 ore (per esempio di notte)
     const path = [];
     rows.forEach((d, i) => { if (view.detail && i && d.d - rows[i - 1].d > 2 * 36e5) path.push(null); path.push(d); });
-    svg.append('path').datum(path).attr('d', d3.line().defined((d) => d != null).x((d) => x(d.d)).y((d) => y(d[metric])))
+    svg.append('path').datum(path).attr('d', d3.line().defined((d) => d != null).x((d) => x(d.d)).y((d) => y(val(d))))
       .style('fill', 'none').style('stroke', accent).style('stroke-width', view.detail ? '1.2px' : '1.5px').style('stroke-linejoin', 'round');
     if (view.detail && rows.length <= 400) {
-      svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.d)).attr('cy', (d) => y(d[metric])).attr('r', 2).style('fill', accent);
+      svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.d)).attr('cy', (d) => y(val(d))).attr('r', 2).style('fill', accent);
     }
     const last = rows[rows.length - 1];
     svg.append('circle').attr('cx', x(last.d)).attr('cy', y(last[metric])).attr('r', 3.5).style('fill', accent);
@@ -475,9 +491,9 @@ footer a { color: var(--accent); }
     svg.append('rect').attr('x', ml).attr('y', top).attr('width', W - ml - mr).attr('height', H - top - bottom).style('fill', 'transparent').style('cursor', 'crosshair')
       .on('pointermove', (ev) => {
         const d = rows[bis(rows, x.invert(d3.pointer(ev)[0]))];
-        dot.attr('cx', x(d.d)).attr('cy', y(d[metric])).attr('visibility', 'visible');
+        dot.attr('cx', x(d.d)).attr('cy', y(val(d))).attr('visibility', 'visible');
         const second = view.detail ? [F.dayTime(d.d), d.server ? `· ${d.server}` : ''] : [F.day(d.d), `· ${d.test} test`];
-        tip.show([[`${info[2](d[metric])} ${info[1]}`, info[0]], second], x(d.d), y(d[metric]));
+        tip.show([[`${info[2](raw(d))} ${info[1]}`, info[0]], second], x(d.d), y(val(d)));
       })
       .on('pointerleave', () => { dot.attr('visibility', 'hidden'); tip.hide(); });
   }
@@ -520,7 +536,7 @@ footer a { color: var(--accent); }
     const W = Math.max(280, el.clientWidth), H = 240, top = 22, bottom = 26;
     const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
       .attr('role', 'img').attr('aria-label', 'Download mediano per ora del giorno nel periodo scelto');
-    const y = d3.scaleLinear().domain([0, Math.max(1000, d3.max(rows, (r) => r.download_mediano))]).nice().range([H - bottom, top]);
+    const y = d3.scaleLinear().domain([0, Math.max(sp(1000), d3.max(rows, (r) => sp(r.download_mediano)))]).nice().range([H - bottom, top]);
     const yt = y.ticks(4);
     const ml = textWidth(svg, F.int(yt[yt.length - 1])) + 10;
     const x = d3.scaleBand().domain(rows.map((r) => r.ora)).range([ml, W - 6]).padding(0.2);
@@ -533,14 +549,14 @@ footer a { color: var(--accent); }
     const highest = d3.max(rows, (r) => r.download_mediano);
     svg.append('g').selectAll('rect').data(rows).join('rect')
       .attr('x', (r) => x(r.ora)).attr('width', x.bandwidth()).attr('rx', 2)
-      .attr('y', (r) => y(r.download_mediano)).attr('height', (r) => y(0) - y(r.download_mediano))
+      .attr('y', (r) => y(sp(r.download_mediano))).attr('height', (r) => y(0) - y(sp(r.download_mediano)))
       .style('fill', (r) => (r === lowest && r.download_mediano < highest * 0.95 ? css('--bad') : css('--accent')));
-    svg.append('text').attr('x', ml).attr('y', top - 10).text(`Ora più lenta: ${lowest.ora}:00, ${F.int(lowest.download_mediano)} Mbps`);
+    svg.append('text').attr('x', ml).attr('y', top - 10).text(`Ora più lenta: ${lowest.ora}:00, ${spf(lowest.download_mediano)} ${U()}`);
     const tip = tipFor(el);
     svg.append('g').selectAll('rect').data(rows).join('rect')
       .attr('x', (r) => x(r.ora)).attr('width', x.bandwidth()).attr('y', top).attr('height', H - top - bottom).style('fill', 'transparent')
-      .on('pointerenter pointermove', (ev, r) => tip.show([[`${r.ora}:00 – ${r.ora}:59`], [`${F.one(r.download_mediano)} Mbps`, 'download mediano'], [`${F.one(r.ping_mediano)} ms`, `ping · ${r.test} test`]],
-        x(r.ora) + x.bandwidth() / 2, y(r.download_mediano)))
+      .on('pointerenter pointermove', (ev, r) => tip.show([[`${r.ora}:00 – ${r.ora}:59`], [`${speedUnit === 'MBs' ? spf(r.download_mediano) : F.one(r.download_mediano)} ${U()}`, 'download mediano'], [`${F.one(r.ping_mediano)} ms`, `ping · ${r.test} test`]],
+        x(r.ora) + x.bandwidth() / 2, y(sp(r.download_mediano))))
       .on('pointerleave', () => tip.hide());
   }
 
@@ -554,8 +570,8 @@ footer a { color: var(--accent); }
     const f = (v, fmt) => (v == null ? '—' : fmt(v));
     view.mesi.forEach((r) => {
       const tr = tb.insertRow();
-      [F.month(F.parseMonth(r.mese)), F.int(r.test), F.int(r.falliti), f(r.download_mediano, F.int), f(r.download_p5, F.int),
-        f(r.upload_mediano, F.int), f(r.ping_mediano, F.one), f(r.ping_minimo, F.one), F.int(r.perdite)]
+      [F.month(F.parseMonth(r.mese)), F.int(r.test), F.int(r.falliti), spf(r.download_mediano), spf(r.download_p5),
+        spf(r.upload_mediano), f(r.ping_mediano, F.one), f(r.ping_minimo, F.one), F.int(r.perdite)]
         .forEach((c, i) => { const td = tr.insertCell(); td.textContent = c; if (i === 8 && r.perdite >= 10) td.className = 'bad'; });
     });
   }
@@ -573,10 +589,13 @@ footer a { color: var(--accent); }
     document.querySelector('details').open = true;
     document.getElementById('soglie').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  (function fillThresholds() {
+  function fillThresholds() {
     const tb = document.getElementById('soglie-body');
+    tb.replaceChildren();
     const f = (v) => num.format(',~r')(v);
-    Object.values(RATING).forEach((c) => {
+    Object.values(RATING).forEach((c0) => {
+      const speed = c0.unit === 'Mbps';
+      const c = speed ? { ...c0, ex: sp(c0.ex), good: sp(c0.good), unit: U() } : { ...c0, name: c0.name.replace('500 Mbps', `${spf(500)} ${U()}`) };
       const u = c.unit === '%' ? '%' : ' ' + c.unit;
       const cells = c.dir === 'high'
         ? [c.name, `da ${f(c.ex)}${u}`, `da ${f(c.good)}${u} a ${f(c.ex)}${u}`, `sotto ${f(c.good)}${u}`]
@@ -584,13 +603,26 @@ footer a { color: var(--accent); }
       const tr = tb.insertRow();
       cells.forEach((x) => { tr.insertCell().textContent = x; });
     });
-  })();
+  }
+  function applyUnit() {
+    document.querySelectorAll('.chip[data-unit]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.unit === speedUnit)));
+    document.querySelectorAll('[data-speed-unit]').forEach((el) => { el.textContent = U(); });
+    document.querySelectorAll('[data-speed-value]').forEach((el) => { el.textContent = `${spf(+el.dataset.speedValue)} ${U()}`; });
+    fillThresholds();
+    if (all) { fillHeader(); render(); }
+  }
+  document.querySelectorAll('.chip[data-unit]').forEach((c) => c.addEventListener('click', () => {
+    speedUnit = c.dataset.unit;
+    try { localStorage.setItem('speedUnit', speedUnit); } catch (e) { /* preferenza non salvata */ }
+    applyUnit();
+  }));
+  applyUnit();
   document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
     metric = b.dataset.metric;
     document.querySelectorAll('.seg button').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
     if (view) drawTrend();
   }));
-  document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { if (all) setPeriod({ preset: c.dataset.preset }); }));
+  document.querySelectorAll('.chip[data-preset]').forEach((c) => c.addEventListener('click', () => { if (all) setPeriod({ preset: c.dataset.preset }); }));
   ['date-from', 'date-to'].forEach((id) => document.getElementById(id).addEventListener('change', () => {
     if (!all) return;
     const from = document.getElementById('date-from').value, to = document.getElementById('date-to').value;
