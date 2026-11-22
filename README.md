@@ -31,8 +31,6 @@ Per pubblicarla serve GitHub Pages attivo: *Settings → Pages → Deploy from a
 
 ## Grafico
 
-![](imgs/osd2p-speed-test-download-upload-mbps-.png)
-
 <https://www.datawrapper.de/_/osd2p/>
 
 # Intestazioni per l'output di speedtest -f csv
