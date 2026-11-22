@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speedtest Buonarroti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500&display=swap">
+<style>
+/* Layout: colonna unica, riepilogo in alto, grafici sotto, tabella mensile in fondo */
+:root {
+  --bg: #f5f7f8; --panel: #ffffff; --fg: #12181d; --muted: #586470; --line: #dbe1e5;
+  --accent: #0b7a75; --accent-soft: #b9d9d6; --muted-bar: #c3ccd2; --bad: #b3261e; --ok: #1e7a3a;
+  --tip-bg: #ffffff; --shadow: 0 6px 20px rgba(18, 24, 29, .12);
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1215; --panel: #161b20; --fg: #e6ebee; --muted: #97a3ad; --line: #283038;
+    --accent: #3cc2b9; --accent-soft: #1f4b48; --muted-bar: #46525c; --bad: #ff7b6e; --ok: #5fd08a;
+    --tip-bg: #1d2329; --shadow: 0 6px 20px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding: 32px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; margin: 0; }
+.lede { margin: 10px 0 0; max-width: 68ch; color: var(--muted); font-size: 1.02rem; }
+.lede b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.meta { margin: 8px 0 0; font-size: .82rem; color: var(--muted); }
+.meta .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; vertical-align: 1px; }
+.meta.err .dot { background: var(--bad); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.big { font-family: var(--font-display); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.unit { font-family: var(--font-body); font-size: .9rem; color: var(--muted); margin-left: .2em; }
+.note { font-size: .8rem; color: var(--muted); line-height: 1.4; }
+.sec { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sec > .note { max-width: 70ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; align-self: flex-start; }
+.seg button { font: inherit; font-size: .82rem; padding: 6px 14px; border: 0; background: var(--bg); color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--fg); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.chart { position: relative; min-height: 240px; width: 100%; }
+.chart svg { display: block; overflow: visible; }
+.chart text { fill: var(--muted); font-size: 11.5px; font-family: var(--font-body); }
+.chart text.strong { fill: var(--fg); font-weight: 500; }
+.tip { position: absolute; pointer-events: none; background: var(--tip-bg); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 6px; padding: 6px 9px; font-size: .78rem; white-space: nowrap; z-index: 2; }
+.tip span { color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 36px; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: .82rem; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 500; }
+td.bad { color: var(--bad); font-weight: 500; }
+.placeholder { color: var(--muted); font-size: .85rem; padding: 24px 0; }
+details summary { cursor: pointer; color: var(--muted); }
+details dl { display: grid; gap: 8px; max-width: 70ch; margin: 14px 0 0; }
+details dt { font-weight: 600; }
+details dd { margin: 0; color: var(--muted); }
+footer { font-size: .78rem; color: var(--muted); }
+footer a { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .tile, .chart svg { transition: opacity .3s ease-out; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Speedtest Buonarroti</h1>
+    <p class="lede" id="lede">Caricamento dei test in corso…</p>
+    <p class="meta" id="meta"><span class="dot"></span>Lettura di <code>output/buonarroti.csv</code>…</p>
+  </header>
+
+  <section class="tiles" aria-label="Riepilogo">
+    <div class="tile"><span class="label">Download mediano</span><span class="big"><span data-k="download_dopo">—</span><span class="unit">Mbps</span></span><span class="note" data-period>Dal 12 feb 2026</span></div>
+    <div class="tile"><span class="label">Upload mediano</span><span class="big"><span data-k="upload_dopo">—</span><span class="unit">Mbps</span></span><span class="note" data-period>Dal 12 feb 2026</span></div>
+    <div class="tile"><span class="label">Ping mediano</span><span class="big"><span data-k="ping_roma">—</span><span class="unit">ms</span></span><span class="note">Server WindTre Roma, dal 12 feb 2026</span></div>
+    <div class="tile"><span class="label">Test sotto 500 Mbps</span><span class="big"><span data-k="quota_lenti">—</span><span class="unit">%</span></span><span class="note">Quota dei test riusciti, dal 12 feb 2026</span></div>
+    <div class="tile"><span class="label">Test con perdita oltre 5%</span><span class="big"><span data-k="perdite_dopo">—</span></span><span class="note">Dal 12 feb 2026, di cui <span data-k="perdite_warian">—</span> sul server Warian – Napoli</span></div>
+    <div class="tile"><span class="label">Test eseguiti</span><span class="big"><span data-k="test_totali">—</span></span><span class="note" id="span-note">Ogni 30 minuti</span></div>
+  </section>
+
+  <section class="sec" id="andamento">
+    <h2>Andamento giornaliero</h2>
+    <p class="note">Mediana dei test di ogni giorno. La linea tratteggiata segna il 12 febbraio 2026, quando il download cambia livello da un giorno all'altro.</p>
+    <div class="seg" role="group" aria-label="Metrica">
+      <button type="button" data-metric="download_mbps" aria-pressed="true">Download</button>
+      <button type="button" data-metric="upload_mbps" aria-pressed="false">Upload</button>
+      <button type="button" data-metric="ping_ms" aria-pressed="false">Ping</button>
+    </div>
+    <div class="chart" id="trend"></div>
+  </section>
+
+  <div class="two">
+    <section class="sec" id="server">
+      <h2>Ping per server di test</h2>
+      <p class="note">Mediana del ping a vuoto e minimo registrato. I server in Campania rispondono più lenti di Roma: il traffico sale prima fino a WindTre e poi torna giù.</p>
+      <div class="chart" id="servers"></div>
+    </section>
+    <section class="sec" id="ore">
+      <h2>Download per ora del giorno</h2>
+      <p class="note">Mediana dei test dal 12 febbraio 2026, ora locale. Di notte lo script non esegue test.</p>
+      <div class="chart" id="hours"></div>
+    </section>
+  </div>
+
+  <section class="sec" id="mesi">
+    <h2>Mese per mese</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Mese</th><th>Test</th><th>Non riusciti</th><th>Download mediano (Mbps)</th><th>Download, 5% peggiore (Mbps)</th>
+          <th>Upload mediano (Mbps)</th><th>Ping mediano (ms)</th><th>Ping minimo (ms)</th><th>Perdita oltre 5%</th>
+        </tr></thead>
+        <tbody id="mesi-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <details>
+    <summary>Come leggere i numeri</summary>
+    <dl>
+      <dt>Mediana</dt><dd>Il valore centrale: metà dei test sta sopra, metà sotto. Non risente dei singoli test andati male.</dd>
+      <dt>Download, 5% peggiore</dt><dd>Il valore sotto cui cade il 5% dei test del mese: mostra quanto va male la linea nei momenti peggiori.</dd>
+      <dt>Ping</dt><dd>La latenza a vuoto misurata dallo speedtest prima di scaricare, in millisecondi.</dd>
+      <dt>Perdita oltre 5%</dt><dd>Test in cui si è perso più del 5% dei pacchetti. Quasi tutti i casi recenti vengono dal server Warian – Napoli, non dalla linea.</dd>
+      <dt>12 febbraio 2026</dt><dd>Il giorno in cui il download mediano passa da circa 70 a circa 930 Mbps. I riquadri in alto contano solo i test da quella data in poi.</dd>
+    </dl>
+  </details>
+
+  <footer>Dati: <a href="https://github.com/pigreco/speedtest-parabola/blob/main/output/buonarroti.csv">output/buonarroti.csv</a>, letti a ogni apertura della pagina.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function () {
+  // Il CSV viene letto dal ramo main: la pagina mostra sempre gli ultimi test inviati dallo script.
+  const DATA_URL = 'https://raw.githubusercontent.com/pigreco/speedtest-parabola/main/output/buonarroti.csv';
+  const CUT = '2026-02-12';        // giorno del salto di velocità
+  const ROMA_ID = '29317';         // server WindTre - Roma
+
+  const num = d3.formatLocale({ decimal: ',', thousands: '.', grouping: [3], currency: ['€', ''] });
+  const tim = d3.timeFormatLocale({
+    dateTime: '%A %e %B %Y, %X', date: '%d/%m/%Y', time: '%H:%M:%S', periods: ['AM', 'PM'],
+    days: ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'],
+    shortDays: ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'],
+    months: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+    shortMonths: ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']
+  });
+  const F = {
+    int: num.format(',.0f'), one: num.format(',.1f'),
+    day: tim.utcFormat('%e %b %Y'), month: tim.utcFormat('%b %Y'), monthShort: tim.utcFormat('%b %y'),
+    parseDay: d3.utcParse('%Y-%m-%d'), parseMonth: d3.utcParse('%Y-%m')
+  };
+  const n = (v) => (v == null || v === '' ? NaN : +v);
+  const r1 = (v) => (v == null || isNaN(v) ? null : Math.round(v * 10) / 10);
+  const r0 = (v) => (v == null || isNaN(v) ? null : Math.round(v));
+  const mbps = (v) => n(v) * 8 / 1e6;   // il CLI Ookla scrive byte al secondo
+  const isOk = (r) => r.download !== '' && r.download != null;
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  let data = null;
+  let metric = 'download_mbps';
+
+  // ---------- Calcoli ----------
+  function compute(rows) {
+    const ok = rows.filter(isOk);
+    const giorni = Array.from(d3.group(ok, (r) => r.timestamp.slice(0, 10)), ([giorno, rs]) => ({
+      giorno, d: F.parseDay(giorno), test: rs.length,
+      download_mbps: r1(d3.median(rs, (r) => mbps(r.download))),
+      upload_mbps: r1(d3.median(rs, (r) => mbps(r.upload))),
+      ping_ms: r1(d3.median(rs, (r) => n(r.idle_latency)))
+    })).sort((a, b) => d3.ascending(a.giorno, b.giorno));
+
+    const mesi = Array.from(d3.group(rows, (r) => r.timestamp.slice(0, 7)), ([mese, rs]) => {
+      const okm = rs.filter(isOk);
+      const dl = okm.map((r) => mbps(r.download)).sort(d3.ascending);
+      return {
+        mese, test: rs.length, falliti: rs.length - okm.length,
+        download_mediano: r0(d3.median(dl)), download_p5: r0(d3.quantileSorted(dl, 0.05)),
+        upload_mediano: r0(d3.median(okm, (r) => mbps(r.upload))),
+        ping_mediano: r1(d3.median(okm, (r) => n(r.idle_latency))),
+        ping_minimo: r1(d3.min(okm, (r) => n(r.idle_latency))),
+        perdite: rs.filter((r) => n(r.packet_loss) > 5).length
+      };
+    }).sort((a, b) => d3.descending(a.mese, b.mese));
+
+    const server = Array.from(d3.group(ok, (r) => r.server_name), ([nome, rs]) => ({
+      server: nome, test: rs.length,
+      ping_mediano: r1(d3.median(rs, (r) => n(r.idle_latency))),
+      ping_minimo: r1(d3.min(rs, (r) => n(r.idle_latency))),
+      perdite: rs.filter((r) => n(r.packet_loss) > 5).length
+    })).filter((s) => s.ping_mediano != null).sort((a, b) => d3.descending(a.test, b.test)).slice(0, 8);
+
+    const dopo = ok.filter((r) => r.timestamp >= CUT);
+    const ore = Array.from(d3.group(dopo, (r) => +r.timestamp.slice(11, 13)), ([ora, rs]) => ({
+      ora, test: rs.length,
+      download_mediano: r1(d3.median(rs, (r) => mbps(r.download))),
+      ping_mediano: r1(d3.median(rs, (r) => n(r.idle_latency)))
+    })).sort((a, b) => d3.ascending(a.ora, b.ora));
+
+    const prima = ok.filter((r) => r.timestamp < CUT);
+    const perdite = rows.filter((r) => r.timestamp >= CUT && n(r.packet_loss) > 5);
+    const sintesi = {
+      test_totali: rows.length,
+      download_prima: r0(d3.median(prima, (r) => mbps(r.download))),
+      download_dopo: r0(d3.median(dopo, (r) => mbps(r.download))),
+      upload_dopo: r0(d3.median(dopo, (r) => mbps(r.upload))),
+      ping_roma: r1(d3.median(dopo.filter((r) => r.server_id === ROMA_ID), (r) => n(r.idle_latency))),
+      quota_lenti: dopo.length ? r1(100 * dopo.filter((r) => mbps(r.download) < 500).length / dopo.length) : null,
+      perdite_dopo: perdite.length,
+      perdite_warian: perdite.filter((r) => String(r.server_name).startsWith('WARIAN')).length,
+      primo: rows[0] && rows[0].timestamp, ultimo: rows.length ? rows[rows.length - 1].timestamp : null
+    };
+    return { giorni, mesi, server, ore, sintesi };
+  }
+
+  // ---------- Testi e riquadri ----------
+  function fill() {
+    const s = data.sintesi;
+    const one = new Set(['ping_roma', 'quota_lenti']);
+    document.querySelectorAll('[data-k]').forEach((el) => {
+      const v = s[el.dataset.k];
+      el.textContent = v == null ? '—' : (one.has(el.dataset.k) ? F.one(v) : F.int(v));
+    });
+    const lede = document.getElementById('lede');
+    lede.replaceChildren();
+    const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+    lede.append('Dal 12 febbraio 2026 la Super Fibra WindTre scarica a ', b(F.int(s.download_dopo) + ' Mbps'),
+      ' di mediana, contro ', b(F.int(s.download_prima) + ' Mbps'), ' dei mesi precedenti. Il ping verso il server WindTre di Roma resta intorno a ',
+      b(F.one(s.ping_roma) + ' ms'), ': è il ritardo fisso del percorso fino a WindTre.');
+    const first = new Date(s.primo), last = new Date(s.ultimo);
+    const dt = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+    const dtt = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('span-note').textContent = `Ogni 30 minuti, ${dt.format(first)} – ${dt.format(last)}`;
+    const meta = document.getElementById('meta');
+    meta.className = 'meta';
+    meta.replaceChildren(Object.assign(document.createElement('span'), { className: 'dot' }), `Ultimo test: ${dtt.format(last)}`);
+  }
+
+  // ---------- Grafici ----------
+  function tipFor(el) {
+    const t = document.createElement('div'); t.className = 'tip'; t.hidden = true; el.append(t);
+    return {
+      show(lines, x, y) {
+        t.replaceChildren(...lines.map(([strong, rest]) => {
+          const d = document.createElement('div'); const bb = document.createElement('b'); bb.textContent = strong; d.append(bb);
+          if (rest) { const sp = document.createElement('span'); sp.textContent = ' ' + rest; d.append(sp); }
+          return d;
+        }));
+        t.hidden = false;
+        t.style.left = Math.max(0, Math.min(el.clientWidth - t.offsetWidth, x - t.offsetWidth / 2)) + 'px';
+        t.style.top = Math.max(0, y - t.offsetHeight - 10) + 'px';
+      },
+      hide() { t.hidden = true; }
+    };
+  }
+  function textWidth(svg, s) { const p = svg.append('text').text(s); const w = p.node().getComputedTextLength(); p.remove(); return w || s.length * 7; }
+
+  function drawTrend() {
+    const el = document.getElementById('trend');
+    const info = { download_mbps: ['Download', 'Mbps', F.int], upload_mbps: ['Upload', 'Mbps', F.int], ping_ms: ['Ping', 'ms', F.one] }[metric];
+    const rows = data.giorni.filter((r) => r[metric] != null).map((r) => ({ d: r.d, v: r[metric], r }));
+    el.replaceChildren();
+    if (!rows.length) return;
+    const W = Math.max(280, el.clientWidth), H = 260, top = 18, bottom = 26, accent = css('--accent');
+    const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('role', 'img').attr('aria-label', `${info[0]} mediano di ogni giorno`);
+    const y = d3.scaleLinear().domain([0, d3.max(rows, (d) => d.v) * 1.05]).nice().range([H - bottom, top]);
+    const yt = y.ticks(5);
+    const ml = textWidth(svg, F.int(yt[yt.length - 1])) + 10, mr = 10;
+    const x = d3.scaleUtc().domain(d3.extent(rows, (d) => d.d)).range([ml, W - mr]);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', W - mr).attr('y1', y).attr('y2', y).style('stroke', css('--line'));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(F.int);
+    const months = d3.utcMonth.count(x.domain()[0], x.domain()[1]) || 1;
+    const every = Math.max(1, Math.ceil(months / Math.max(2, Math.floor((W - ml) / 70))));
+    svg.append('g').selectAll('text').data(x.ticks(d3.utcMonth.every(every))).join('text')
+      .attr('x', x).attr('y', H - 6).attr('text-anchor', 'middle').text(F.monthShort);
+    const cut = F.parseDay(CUT);
+    if (cut >= x.domain()[0] && cut <= x.domain()[1]) {
+      svg.append('line').attr('x1', x(cut)).attr('x2', x(cut)).attr('y1', top - 4).attr('y2', H - bottom).style('stroke', css('--muted')).style('stroke-dasharray', '4 3');
+      svg.append('text').attr('x', x(cut) - 6).attr('y', top - 6).attr('text-anchor', 'end').text('12 feb 2026');
+    }
+    svg.append('path').datum(rows).attr('d', d3.line().x((d) => x(d.d)).y((d) => y(d.v)))
+      .style('fill', 'none').style('stroke', accent).style('stroke-width', '1.5px').style('stroke-linejoin', 'round');
+    const last = rows[rows.length - 1];
+    svg.append('circle').attr('cx', x(last.d)).attr('cy', y(last.v)).attr('r', 3.5).style('fill', accent);
+    const dot = svg.append('circle').attr('r', 4).style('fill', accent).style('stroke', css('--bg')).style('stroke-width', '2px').attr('visibility', 'hidden');
+    const tip = tipFor(el), bis = d3.bisector((d) => d.d).center;
+    svg.append('rect').attr('x', ml).attr('y', top).attr('width', W - ml - mr).attr('height', H - top - bottom).style('fill', 'transparent').style('cursor', 'crosshair')
+      .on('pointermove', (ev) => {
+        const d = rows[bis(rows, x.invert(d3.pointer(ev)[0]))];
+        dot.attr('cx', x(d.d)).attr('cy', y(d.v)).attr('visibility', 'visible');
+        tip.show([[`${info[2](d.v)} ${info[1]}`, info[0]], [F.day(d.d), `· ${d.r.test} test`]], x(d.d), y(d.v));
+      })
+      .on('pointerleave', () => { dot.attr('visibility', 'hidden'); tip.hide(); });
+  }
+
+  function drawServers() {
+    const el = document.getElementById('servers');
+    const rows = data.server;
+    el.replaceChildren();
+    if (!rows.length) return;
+    const W = Math.max(280, el.clientWidth), rowH = 28, top = 4, H = rows.length * rowH + top + 22;
+    const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('role', 'img').attr('aria-label', 'Ping mediano per server di test');
+    const lw = d3.max(rows, (r) => textWidth(svg, r.server));
+    const ew = textWidth(svg, '00,0 ms · min 00,0');
+    const ml = Math.min(lw, W * 0.45) + 10;
+    const x = d3.scaleLinear().domain([0, d3.max(rows, (r) => r.ping_mediano)]).nice().range([ml, Math.max(ml + 40, W - ew - 10)]);
+    const y = d3.scaleBand().domain(rows.map((r) => r.server)).range([top, top + rows.length * rowH]).padding(0.3);
+    const isRoma = (r) => r.server.startsWith('Wind Tre - Roma');
+    const xt = x.ticks(W < 520 ? 2 : 4);
+    svg.append('g').selectAll('line').data(xt).join('line').attr('x1', x).attr('x2', x).attr('y1', top).attr('y2', top + rows.length * rowH).style('stroke', css('--line'));
+    svg.append('g').selectAll('text').data(xt).join('text').attr('x', x).attr('y', H - 4).attr('text-anchor', 'middle').text((t) => F.int(t) + ' ms');
+    const g = svg.append('g').selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', ml - 8).attr('y', (r) => y(r.server) + y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .attr('class', (r) => (isRoma(r) ? 'strong' : null)).text((r) => r.server);
+    g.append('rect').attr('x', ml).attr('y', (r) => y(r.server)).attr('height', y.bandwidth()).attr('rx', 2)
+      .attr('width', (r) => Math.max(1, x(r.ping_mediano) - ml)).style('fill', (r) => (isRoma(r) ? css('--accent') : css('--muted-bar')));
+    g.append('text').attr('x', (r) => x(r.ping_mediano) + 6).attr('y', (r) => y(r.server) + y.bandwidth() / 2).attr('dy', '0.32em')
+      .text((r) => `${F.one(r.ping_mediano)} ms · min ${r.ping_minimo == null ? '—' : F.one(r.ping_minimo)}`);
+    const tip = tipFor(el);
+    g.append('rect').attr('x', 0).attr('y', (r) => y(r.server) - 4).attr('width', W).attr('height', y.bandwidth() + 8).style('fill', 'transparent')
+      .on('pointerenter pointermove', (ev, r) => tip.show([[r.server], [`${F.one(r.ping_mediano)} ms`, 'ping mediano'], [F.int(r.test), `test · ${r.perdite} con perdita oltre 5%`]], x(r.ping_mediano), y(r.server)))
+      .on('pointerleave', () => tip.hide());
+  }
+
+  function drawHours() {
+    const el = document.getElementById('hours');
+    const rows = data.ore.filter((r) => r.download_mediano != null);
+    el.replaceChildren();
+    if (!rows.length) return;
+    const W = Math.max(280, el.clientWidth), H = 240, top = 22, bottom = 26;
+    const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('role', 'img').attr('aria-label', 'Download mediano per ora del giorno');
+    const y = d3.scaleLinear().domain([0, Math.max(1000, d3.max(rows, (r) => r.download_mediano))]).nice().range([H - bottom, top]);
+    const yt = y.ticks(4);
+    const ml = textWidth(svg, F.int(yt[yt.length - 1])) + 10;
+    const x = d3.scaleBand().domain(rows.map((r) => r.ora)).range([ml, W - 6]).padding(0.2);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('x1', ml).attr('x2', W - 6).attr('y1', y).attr('y2', y).style('stroke', css('--line'));
+    svg.append('g').selectAll('text').data(yt).join('text').attr('x', ml - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(F.int);
+    const step = x.bandwidth() < 24 ? 2 : 1;
+    svg.append('g').selectAll('text').data(rows.filter((r, i) => i % step === 0)).join('text')
+      .attr('x', (r) => x(r.ora) + x.bandwidth() / 2).attr('y', H - 6).attr('text-anchor', 'middle').text((r) => r.ora + ':00');
+    const lowest = d3.least(rows, (r) => r.download_mediano);
+    svg.append('g').selectAll('rect').data(rows).join('rect')
+      .attr('x', (r) => x(r.ora)).attr('width', x.bandwidth()).attr('rx', 2)
+      .attr('y', (r) => y(r.download_mediano)).attr('height', (r) => y(0) - y(r.download_mediano))
+      .style('fill', (r) => (r === lowest && r.download_mediano < 900 ? css('--bad') : css('--accent')));
+    svg.append('text').attr('x', ml).attr('y', top - 10).text(`Ora più lenta: ${lowest.ora}:00, ${F.int(lowest.download_mediano)} Mbps`);
+    const tip = tipFor(el);
+    svg.append('g').selectAll('rect').data(rows).join('rect')
+      .attr('x', (r) => x(r.ora)).attr('width', x.bandwidth()).attr('y', top).attr('height', H - top - bottom).style('fill', 'transparent')
+      .on('pointerenter pointermove', (ev, r) => tip.show([[`${r.ora}:00 – ${r.ora}:59`], [`${F.one(r.download_mediano)} Mbps`, 'download mediano'], [`${F.one(r.ping_mediano)} ms`, `ping · ${r.test} test`]],
+        x(r.ora) + x.bandwidth() / 2, y(r.download_mediano)))
+      .on('pointerleave', () => tip.hide());
+  }
+
+  function drawTable() {
+    const tb = document.getElementById('mesi-body');
+    tb.replaceChildren();
+    const f = (v, fmt) => (v == null ? '—' : fmt(v));
+    data.mesi.forEach((r) => {
+      const tr = tb.insertRow();
+      [F.month(F.parseMonth(r.mese)), F.int(r.test), F.int(r.falliti), f(r.download_mediano, F.int), f(r.download_p5, F.int),
+        f(r.upload_mediano, F.int), f(r.ping_mediano, F.one), f(r.ping_minimo, F.one), F.int(r.perdite)]
+        .forEach((c, i) => { const td = tr.insertCell(); td.textContent = c; if (i === 8 && r.perdite >= 10) td.className = 'bad'; });
+    });
+  }
+
+  function drawAll() { if (!data) return; drawTrend(); drawServers(); drawHours(); }
+
+  // ---------- Avvio ----------
+  document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
+    metric = b.dataset.metric;
+    document.querySelectorAll('.seg button').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+    if (data) drawTrend();
+  }));
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 150); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawAll);
+
+  d3.csv(DATA_URL + '?t=' + Date.now()).then((rows) => {
+    rows.sort((a, b) => d3.ascending(a.timestamp, b.timestamp));
+    data = compute(rows);
+    fill(); drawAll(); drawTable();
+  }).catch((err) => {
+    const meta = document.getElementById('meta');
+    meta.className = 'meta err';
+    meta.replaceChildren(Object.assign(document.createElement('span'), { className: 'dot' }), 'Non riesco a leggere output/buonarroti.csv: controlla la connessione e ricarica la pagina.');
+    document.getElementById('lede').textContent = 'I dati non sono disponibili.';
+    ['trend', 'servers', 'hours'].forEach((id) => {
+      const p = document.createElement('p'); p.className = 'placeholder'; p.textContent = 'Grafico non disponibile.';
+      document.getElementById(id).replaceChildren(p);
+    });
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>
