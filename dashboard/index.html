@@ -12,7 +12,7 @@
 /* Layout: colonna unica, filtro del periodo in alto, riepilogo, grafici, tabella mensile in fondo */
 :root {
   --bg: #f5f7f8; --panel: #ffffff; --fg: #12181d; --muted: #586470; --line: #dbe1e5;
-  --accent: #0b7a75; --accent-soft: #e1efee; --muted-bar: #c3ccd2; --bad: #b3261e; --ok: #1e7a3a;
+  --accent: #0b7a75; --accent-soft: #e1efee; --muted-bar: #c3ccd2; --bad: #b3261e; --ok: #1e7a3a; --warn: #9a5b00;
   --tip-bg: #ffffff; --shadow: 0 6px 20px rgba(18, 24, 29, .12);
   --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
   --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -22,7 +22,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0e1215; --panel: #161b20; --fg: #e6ebee; --muted: #97a3ad; --line: #283038;
-    --accent: #3cc2b9; --accent-soft: #15302f; --muted-bar: #46525c; --bad: #ff7b6e; --ok: #5fd08a;
+    --accent: #3cc2b9; --accent-soft: #15302f; --muted-bar: #46525c; --bad: #ff7b6e; --ok: #5fd08a; --warn: #f2b155;
     --tip-bg: #1d2329; --shadow: 0 6px 20px rgba(0, 0, 0, .5);
     color-scheme: dark;
   }
@@ -61,6 +61,18 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; marg
 
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
 .tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tile-head { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 8px; }
+.tile[data-rating] { border-top: 3px solid var(--rate); }
+.tile[data-rating="ex"], .legend .ex { --rate: var(--ok); }
+.tile[data-rating="good"], .legend .good { --rate: var(--warn); }
+.tile[data-rating="low"], .legend .low { --rate: var(--bad); }
+.badge { flex: none; font-size: .7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; color: var(--rate); background: color-mix(in srgb, var(--rate) 14%, transparent); white-space: nowrap; }
+.badge:empty { display: none; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: .8rem; color: var(--muted); margin-top: -18px; }
+.legend .sw { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); }
+.legend .sw::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--rate); }
+.thresholds { border-collapse: collapse; font-size: .82rem; margin-top: 4px; }
+.thresholds th, .thresholds td { text-align: left; padding: 5px 10px; white-space: normal; }
 .label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .big { font-family: var(--font-display); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .unit { font-family: var(--font-body); font-size: .9rem; color: var(--muted); margin-left: .2em; }
@@ -125,13 +137,21 @@ footer a { color: var(--accent); }
   </section>
 
   <section class="tiles" aria-label="Riepilogo del periodo">
-    <div class="tile"><span class="label">Download mediano</span><span class="big"><span data-k="download">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
-    <div class="tile"><span class="label">Upload mediano</span><span class="big"><span data-k="upload">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
-    <div class="tile"><span class="label">Ping mediano</span><span class="big"><span data-k="ping_roma">—</span><span class="unit">ms</span></span><span class="note">Server WindTre Roma</span></div>
-    <div class="tile"><span class="label">Test sotto 500 Mbps</span><span class="big"><span data-k="quota_lenti">—</span><span class="unit">%</span></span><span class="note">Quota dei test riusciti</span></div>
-    <div class="tile"><span class="label">Test con perdita oltre 5%</span><span class="big"><span data-k="perdite">—</span></span><span class="note">di cui <span data-k="perdite_warian">—</span> sul server Warian – Napoli</span></div>
-    <div class="tile"><span class="label">Test eseguiti</span><span class="big"><span data-k="test">—</span></span><span class="note"><span data-k="falliti">—</span> non riusciti</span></div>
+    <div class="tile" data-rate="download"><div class="tile-head"><span class="label">Download mediano</span><span class="badge"></span></div><span class="big"><span data-k="download">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
+    <div class="tile" data-rate="upload"><div class="tile-head"><span class="label">Upload mediano</span><span class="badge"></span></div><span class="big"><span data-k="upload">—</span><span class="unit">Mbps</span></span><span class="note" data-period-note>—</span></div>
+    <div class="tile" data-rate="ping_roma"><div class="tile-head"><span class="label">Ping mediano</span><span class="badge"></span></div><span class="big"><span data-k="ping_roma">—</span><span class="unit">ms</span></span><span class="note">Server WindTre Roma</span></div>
+    <div class="tile" data-rate="quota_lenti"><div class="tile-head"><span class="label">Test sotto 500 Mbps</span><span class="badge"></span></div><span class="big"><span data-k="quota_lenti">—</span><span class="unit">%</span></span><span class="note">Quota dei test riusciti</span></div>
+    <div class="tile" data-rate="perdite_pct"><div class="tile-head"><span class="label">Test con perdita oltre 5%</span><span class="badge"></span></div><span class="big"><span data-k="perdite">—</span></span><span class="note"><span data-k="perdite_pct">—</span>% dei test, di cui <span data-k="perdite_warian">—</span> sul server Warian – Napoli</span></div>
+    <div class="tile" data-rate="riusciti_pct"><div class="tile-head"><span class="label">Test eseguiti</span><span class="badge"></span></div><span class="big"><span data-k="test">—</span></span><span class="note"><span data-k="riusciti_pct">—</span>% riusciti, <span data-k="falliti">—</span> non riusciti</span></div>
   </section>
+
+  <p class="legend" aria-label="Legenda della valutazione">
+    <span>Valutazione rispetto a una fibra FTTH 1 Gbps / 300 Mbps:</span>
+    <span class="sw ex">Eccellente</span>
+    <span class="sw good">Buono</span>
+    <span class="sw low">Medio / scarso</span>
+    <span>· soglie in <a href="#soglie" id="link-soglie" style="color:var(--accent)">Come leggere i numeri</a></span>
+  </p>
 
   <section class="sec" id="andamento">
     <h2>Andamento</h2>
@@ -175,6 +195,8 @@ footer a { color: var(--accent); }
     <summary>Come leggere i numeri</summary>
     <dl>
       <dt>La linea</dt><dd>Fibra ottica FTTH, cioè fino a casa, con l'offerta WindTre Super Fibra in area bianca.</dd>
+      <dt id="soglie">Valutazione dei riquadri</dt><dd>Ogni riquadro è confrontato con quello che ci si aspetta da una fibra FTTH da 1 Gbps in download e 300 Mbps in upload. Il download reale non supera circa 940 Mbps, il limite pratico di una porta di rete Gigabit.
+        <div class="tablewrap"><table class="thresholds"><thead><tr><th>Riquadro</th><th>Eccellente</th><th>Buono</th><th>Medio / scarso</th></tr></thead><tbody id="soglie-body"></tbody></table></div></dd>
       <dt>Periodo</dt><dd>I periodi rapidi contano i giorni a ritroso dall'ultimo test registrato. Con le date Dal e al puoi scegliere un intervallo qualsiasi: riquadri, grafici e tabella si aggiornano insieme. Il periodo scelto resta nell'indirizzo della pagina, così puoi condividerlo.</dd>
       <dt>Mediana</dt><dd>Il valore centrale: metà dei test sta sopra, metà sotto. Non risente dei singoli test andati male.</dd>
       <dt>Andamento</dt><dd>Per periodi fino a 31 giorni il grafico mostra ogni singolo test; per periodi più lunghi la mediana di ogni giorno.</dd>
@@ -196,6 +218,24 @@ footer a { color: var(--accent); }
   const CUT = '2026-02-12';        // giorno del salto di velocità
   const ROMA_ID = '29317';         // server WindTre - Roma
   const DETAIL_DAYS = 31;          // fino a questo numero di giorni il grafico mostra ogni test
+
+  // Soglie di valutazione per una fibra FTTH 1 Gbps in download / 300 Mbps in upload.
+  // 'high': più alto è meglio; 'low': più basso è meglio. Cambiale qui se il profilo è diverso.
+  const RATING = {
+    download:     { dir: 'high', ex: 800, good: 500, unit: 'Mbps', name: 'Download mediano' },
+    upload:       { dir: 'high', ex: 240, good: 150, unit: 'Mbps', name: 'Upload mediano' },
+    ping_roma:    { dir: 'low',  ex: 15,  good: 30,  unit: 'ms',   name: 'Ping mediano (WindTre Roma)' },
+    quota_lenti:  { dir: 'low',  ex: 2,   good: 10,  unit: '%',    name: 'Test sotto 500 Mbps' },
+    perdite_pct:  { dir: 'low',  ex: 1,   good: 3,   unit: '%',    name: 'Test con perdita oltre 5%' },
+    riusciti_pct: { dir: 'high', ex: 98,  good: 95,  unit: '%',    name: 'Test riusciti' }
+  };
+  const RATING_LABEL = { ex: 'Eccellente', good: 'Buono', low: 'Medio / scarso' };
+  function rate(key, v) {
+    const c = RATING[key];
+    if (!c || v == null || isNaN(v)) return null;
+    if (c.dir === 'high') return v >= c.ex ? 'ex' : v >= c.good ? 'good' : 'low';
+    return v <= c.ex ? 'ex' : v <= c.good ? 'good' : 'low';
+  }
 
   const num = d3.formatLocale({ decimal: ',', thousands: '.', grouping: [3], currency: ['€', ''] });
   const tim = d3.timeFormatLocale({
@@ -315,7 +355,9 @@ footer a { color: var(--accent); }
       ping_roma: r1(d3.median(ok.filter((r) => r.server_id === ROMA_ID), (r) => n(r.idle_latency))),
       quota_lenti: ok.length ? r1(100 * ok.filter((r) => mbps(r.download) < 500).length / ok.length) : null,
       perdite: perdite.length,
-      perdite_warian: perdite.filter((r) => String(r.server_name).startsWith('WARIAN')).length
+      perdite_warian: perdite.filter((r) => String(r.server_name).startsWith('WARIAN')).length,
+      perdite_pct: rows.length ? r1(100 * perdite.length / rows.length) : null,
+      riusciti_pct: rows.length ? r1(100 * ok.length / rows.length) : null
     };
     return { serie, detail, days, mesi, server, ore, tiles };
   }
@@ -342,10 +384,15 @@ footer a { color: var(--accent); }
   // ---------- Riquadri ----------
   function fillTiles() {
     const t = view.tiles;
-    const one = new Set(['ping_roma', 'quota_lenti']);
+    const one = new Set(['ping_roma', 'quota_lenti', 'perdite_pct', 'riusciti_pct']);
     document.querySelectorAll('[data-k]').forEach((el) => {
       const v = t[el.dataset.k];
       el.textContent = v == null ? '—' : (one.has(el.dataset.k) ? F.one(v) : F.int(v));
+    });
+    document.querySelectorAll('.tile[data-rate]').forEach((tile) => {
+      const r = rate(tile.dataset.rate, t[tile.dataset.rate]);
+      if (r) tile.dataset.rating = r; else delete tile.dataset.rating;
+      tile.querySelector('.badge').textContent = r ? RATING_LABEL[r] : '';
     });
     const label = `${F.day(F.parseDay(period.from))} – ${F.day(F.parseDay(period.to))}`;
     document.querySelectorAll('[data-period-note]').forEach((el) => { el.textContent = label; });
@@ -521,6 +568,23 @@ footer a { color: var(--accent); }
   }
 
   // ---------- Avvio ----------
+  document.getElementById('link-soglie').addEventListener('click', (ev) => {
+    ev.preventDefault();
+    document.querySelector('details').open = true;
+    document.getElementById('soglie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  (function fillThresholds() {
+    const tb = document.getElementById('soglie-body');
+    const f = (v) => num.format(',~r')(v);
+    Object.values(RATING).forEach((c) => {
+      const u = c.unit === '%' ? '%' : ' ' + c.unit;
+      const cells = c.dir === 'high'
+        ? [c.name, `da ${f(c.ex)}${u}`, `da ${f(c.good)}${u} a ${f(c.ex)}${u}`, `sotto ${f(c.good)}${u}`]
+        : [c.name, `fino a ${f(c.ex)}${u}`, `da ${f(c.ex)}${u} a ${f(c.good)}${u}`, `oltre ${f(c.good)}${u}`];
+      const tr = tb.insertRow();
+      cells.forEach((x) => { tr.insertCell().textContent = x; });
+    });
+  })();
   document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
     metric = b.dataset.metric;
     document.querySelectorAll('.seg button').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
