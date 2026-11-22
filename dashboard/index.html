@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Speedtest Buonarroti</title>
+<meta name="description" content="Speedtest ogni 30 minuti su una linea in fibra FTTH WindTre Super Fibra in area bianca.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500&display=swap">
@@ -34,6 +35,9 @@ body {
 .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
 h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
 h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; margin: 0; }
+.line-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.line-tags li { font-size: .8rem; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--fg); }
+.line-tags li.main { background: var(--accent); color: var(--bg); font-weight: 600; }
 .lede { margin: 10px 0 0; max-width: 68ch; color: var(--muted); font-size: 1.02rem; }
 .lede b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
 .meta { margin: 8px 0 0; font-size: .82rem; color: var(--muted); }
@@ -94,6 +98,12 @@ footer a { color: var(--accent); }
 <main class="wrap">
   <header>
     <h1>Speedtest Buonarroti</h1>
+    <ul class="line-tags" aria-label="Tipo di linea">
+      <li class="main">Fibra FTTH</li>
+      <li>Fibra ottica fino a casa</li>
+      <li>WindTre Super Fibra</li>
+      <li>Aree bianche</li>
+    </ul>
     <p class="lede" id="lede">Caricamento dei test in corso…</p>
     <p class="meta" id="meta"><span class="dot"></span>Lettura di <code>output/buonarroti.csv</code>…</p>
   </header>
@@ -164,6 +174,7 @@ footer a { color: var(--accent); }
   <details>
     <summary>Come leggere i numeri</summary>
     <dl>
+      <dt>La linea</dt><dd>Fibra ottica FTTH, cioè fino a casa, con l'offerta WindTre Super Fibra in area bianca.</dd>
       <dt>Periodo</dt><dd>I periodi rapidi contano i giorni a ritroso dall'ultimo test registrato. Con le date Dal e al puoi scegliere un intervallo qualsiasi: riquadri, grafici e tabella si aggiornano insieme. Il periodo scelto resta nell'indirizzo della pagina, così puoi condividerlo.</dd>
       <dt>Mediana</dt><dd>Il valore centrale: metà dei test sta sopra, metà sotto. Non risente dei singoli test andati male.</dd>
       <dt>Andamento</dt><dd>Per periodi fino a 31 giorni il grafico mostra ogni singolo test; per periodi più lunghi la mediana di ogni giorno.</dd>
@@ -318,7 +329,7 @@ footer a { color: var(--accent); }
     const ping = r1(d3.median(dopo.filter((r) => r.server_id === ROMA_ID), (r) => n(r.idle_latency)));
     const lede = document.getElementById('lede');
     const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
-    lede.replaceChildren('Dal 12 febbraio 2026 la Super Fibra WindTre scarica a ', b(F.int(dDopo) + ' Mbps'),
+    lede.replaceChildren('Dal 12 febbraio 2026 la linea in fibra FTTH scarica a ', b(F.int(dDopo) + ' Mbps'),
       ' di mediana, contro ', b(F.int(dPrima) + ' Mbps'), ' dei mesi precedenti. Il ping verso il server WindTre di Roma resta intorno a ',
       b(F.one(ping) + ' ms'), ': è il ritardo fisso del percorso fino a WindTre.');
     const last = all[all.length - 1];
