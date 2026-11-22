@@ -56,8 +56,7 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; marg
 .dates { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .82rem; color: var(--muted); }
 .dates input { font: inherit; font-size: .82rem; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--fg); }
 .dates input.custom { border-color: var(--accent); }
-.units { display: flex; align-items: center; gap: 6px; margin-left: auto; }
-@media (max-width: 719px) { .units { margin-left: 0; } }
+.units { display: flex; align-items: center; gap: 6px; margin-top: -16px; }
 .period-summary { font-size: .82rem; color: var(--muted); flex-basis: 100%; }
 .period-summary b { color: var(--fg); font-weight: 500; }
 
@@ -135,11 +134,6 @@ footer a { color: var(--accent); }
       <label for="date-from">Dal</label><input type="date" id="date-from">
       <label for="date-to">al</label><input type="date" id="date-to">
     </div>
-    <div class="units" role="group" aria-label="Unità di velocità">
-      <span class="period-label">Unità</span>
-      <button type="button" class="chip" data-unit="Mbps" aria-pressed="true">Mbps</button>
-      <button type="button" class="chip" data-unit="MBs" aria-pressed="false">MB/s</button>
-    </div>
     <p class="period-summary" id="period-summary">&nbsp;</p>
   </section>
 
@@ -159,6 +153,12 @@ footer a { color: var(--accent); }
     <span class="sw low">Medio / scarso</span>
     <span>· soglie in <a href="#soglie" id="link-soglie" style="color:var(--accent)">Come leggere i numeri</a></span>
   </p>
+
+  <div class="units" role="group" aria-label="Unità di velocità">
+    <span class="period-label">Unità</span>
+    <button type="button" class="chip" data-unit="Mbps" aria-pressed="true">Mbps</button>
+    <button type="button" class="chip" data-unit="MBs" aria-pressed="false">MB/s</button>
+  </div>
 
   <section class="sec" id="andamento">
     <h2>Andamento</h2>
